@@ -1,0 +1,9 @@
+{
+  "name": "1bead-bead-filters",
+  "version": "1.0.0",
+  "description": "Static JSON data pipeline for 1bead BigCommerce Refine filter bar",
+  "type": "module",
+  "scripts": {
+    "build": "node build-index.mjs"
+  }
+}
