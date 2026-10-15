@@ -10,7 +10,7 @@ To enable the automated nightly build, go to:
 **Settings > Secrets and variables > Actions > New repository secret**
 
 Add the following two secrets:
-* **`BC_STORE_HASH`**: Your 1bead BigCommerce store hash (e.g. `xr85ifge`)
+* **`BC_STORE_HASH`**: `8pw095b0pw`
 * **`BC_TOKEN`**: BigCommerce API token with **Products: read-only** scope
 
 ---
