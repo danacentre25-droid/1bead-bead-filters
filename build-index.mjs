@@ -92,6 +92,108 @@ async function main() {
     skuStone = JSON.parse(await readFile('sku-to-stone.json', 'utf8'));
   } catch (e) {}
 
+function suggestSize(name) {
+  const m = String(name || '').match(/(\d+(?:\.\d+)?)\s*(?:x\s*(\d+(?:\.\d+)?)\s*)?mm/i);
+  if (!m) return '';
+  const n = Math.max(parseFloat(m[1]), m[2] ? parseFloat(m[2]) : 0);
+  const std = [2, 3, 4, 6, 8, 10, 12, 14, 15, 16, 18, 20, 25, 30, 35, 40, 45, 50];
+  let best = std[0];
+  for (const s of std) if (Math.abs(s - n) < Math.abs(best - n)) best = s;
+  return best + 'mm';
+}
+
+const SHAPES = [
+  ['rondelle faceted', 'Rondelle Faceted'], ['round faceted', 'Round Faceted'],
+  ['rondelle', 'Rondelle'], ['roundel', 'Rondelle'], ['round bead', 'Round Bead'],
+  ['round', 'Round'], ['oval', 'Oval'], ['rice', 'Rice'], ['tube', 'Tube'],
+  ['cube', 'Cube'], ['coin', 'Coin'], ['heart', 'Heart'], ['teardrop', 'Teardrop'],
+  ['nugget', 'Nugget'], ['chips', 'Chips'], ['chip', 'Chip'], ['bicone', 'Bicone'],
+  ['donut', 'Donut'], ['polygon', 'Polygon'], ['pear', 'Pear'], ['carved', 'Carved'],
+  ['bracelet', 'Bracelet'], ['heishi', 'Heishi'], ['rectangle', 'Rectangle'],
+  ['square', 'Square'], ['hexagon', 'Hexagon'], ['animal', 'Animal'],
+  ['plant', 'Plant'], ['symbol', 'Symbol'], ['earring', 'Earring'],
+  ['ring', 'Ring'], ['rope', 'Rope'], ['mix shape', 'Mix Shape'],
+  ['clasp', 'Clasp'], ['pendant', 'Pendant']
+];
+function suggestShape(name) {
+  const n = String(name || '').toLowerCase();
+  for (const s of SHAPES) {
+    if (n.includes(s[0])) return s[1];
+  }
+  return '';
+}
+
+function suggestTreatment(name) {
+  const n = String(name || '').toLowerCase();
+  if (/\b(natural dyed|dyed natural)\b/.test(n)) return 'Natural Dyed';
+  if (/\bdyed?\b/.test(n)) return 'Dyed';
+  if (/\bheat(ed)?\b/.test(n)) return 'Heated';
+  if (/\b100%\s*natural\b/.test(n)) return '100% Natural';
+  if (/\bnatural\b/.test(n)) return 'Natural';
+  if (/\bsynthetic\b/.test(n)) return 'Synthetic';
+  if (/\b(man\s*made|manmade)\b/.test(n)) return 'Man Made';
+  if (/\breconstructed\b/.test(n)) return 'Reconstructed';
+  if (/\bstabilized\b/.test(n)) return 'Stabilized';
+  return '';
+}
+
+function suggestMaterial(name) {
+  const t = String(name || '').toLowerCase();
+  if (/\bmatte\b/.test(t) && /gemstone|quartz|agate|jasper|jade/.test(t)) return 'Gemstone Matte';
+  if (/crystal\s*glass|glass\s*crystal|\bglass\b/.test(t)) return 'Crystal Glass';
+  if (/\bamber\s*horn\b/.test(t)) return 'Amber Horn';
+  if (/\bbuffalo\s*horn\b|\bhorn\b/.test(t)) return 'Buffalo Horn';
+  if (/\bbuffalo\s*bone\b|\bbone\b/.test(t)) return 'Buffalo Bone';
+  if (/\bpearl\b/.test(t)) return 'Pearl';
+  if (/\b(clasp|finding|part|wire|chain)\b/.test(t)) return 'Finding';
+  if (/\b(metal|alloy|brass|silver|gold\s*plated)\b/.test(t)) return 'Metal';
+  return 'Gemstone';
+}
+
+const COLORS = [
+  'Multicolor', 'Multi Color', 'Mix', 'Amethyst', 'Turquoise', 'Crystal', 'Clear',
+  'Black', 'Blue', 'Brown', 'Green', 'Grey', 'Orange', 'Pink', 'Purple', 'Red', 'White', 'Yellow'
+];
+function suggestColor(name) {
+  const n = String(name || '').toLowerCase();
+  for (const c of COLORS) {
+    if (new RegExp('\\b' + c.toLowerCase() + '\\b', 'i').test(n)) return c;
+  }
+  return '';
+}
+
+const STONES_96 = [
+  '7 Chakra', 'Agate', 'Amazonite', 'Amber Horn', 'Amethyst', 'Apatite',
+  'Aquamarine', 'Aventurine', 'Azurite', 'Banded Agate', 'Black Agate',
+  'Blood Agate', 'Bone', 'Boulder opal', 'Bronzite', 'Brown Snowflake',
+  'Buffalo Horn', 'Calcite', 'Carnelian', 'Chalcedony', 'Charoite',
+  'Cherry Quartz', 'Chrysanthemum', 'Chrysprase', 'Citrine', 'Coral',
+  'Crazy Lace Agate', 'Crystal Natural', 'Crystal Synthetic',
+  'Dalmatian Jasper', 'Denim Lapis', 'Druzy Agate', 'Epidot', 'Fire Agate',
+  'Fluorite', 'Fossil Agate', 'Fossil Jasper', 'Freshwater Pearl', 'Garnet',
+  'Glass Crystal', 'Golden Obsidian', 'Goldstone', 'Green Turquoise',
+  'Hematite', 'Howlite', 'Jade dyed', 'Jade Natural', 'Jasper', 'Kiwi Agate',
+  'Labradorite', 'Lapis Lazuli', 'Larimar', 'Lava', 'Lemon Agate',
+  'Leopard Skin', 'Lepidolite', 'Magnesite', 'Mahogany Obsidian',
+  'Malachite', 'Mix', 'Mookaite', 'Moss Agate', 'Mother Of Pearl',
+  'Nephrite Jade', 'Onyx', 'Opalite', 'Other Stones', 'Petrified Wood',
+  'Picasso Agate', 'Picture Jasper', 'Poppy Jasper', 'Quartz',
+  'Red Aventurine', 'Red Creek Jasper', 'Red Jasper', 'Rhodonite',
+  'River Fossil', 'Ruby Zoisite', 'Rutilated', 'Sea Sediment', 'Serpentine',
+  'Sesame Agate', 'Smoky Topaz', 'Snow Quartz', 'Snowflake Obsidian',
+  'Sodalite', 'Sunstone', 'Tiger Eye', 'Topaz Synthetic', 'Tourmaline',
+  'Turquoise', 'Unakite', 'White Obsidian', 'White Turquoise',
+  'Yellow Chalcedony', 'Zebra Agate'
+].sort((a, b) => b.length - a.length);
+
+function matchStone(name) {
+  const n = ' ' + String(name || '').toLowerCase() + ' ';
+  for (const s of STONES_96) {
+    if (new RegExp('\\b' + s.toLowerCase().replace(/\\s+/g, '\\s+') + '\\b', 'i').test(n)) return s;
+  }
+  return '';
+}
+
   // Row format for 1bead (keep in sync with 1bead storefront scripts):
   // [0:id, 1:name, 2:url, 3:image, 4:price, 5:size, 6:shape, 7:color, 8:treatment, 9:material, 10:priceA, 11:priceB, 12:priceC, 13:priceD, 14:priceE, 15:minQty, 16:stone]
   const byCat = {};
@@ -102,18 +204,18 @@ async function main() {
     const minQty = p.order_quantity_minimum > 0 ? p.order_quantity_minimum : (/bracelet/i.test(p.name) ? 30 : 1);
     const skuMatch = String(p.name || '').match(/\[([^\]]+)\]/);
     const sku = (skuMatch ? skuMatch[1] : (p.custom_url && p.custom_url.url ? p.custom_url.url.replace(/\//g, '') : '')).trim().toLowerCase();
-    const stone = cf['Stone'] || cf['Stone Name'] || skuStone[sku] || '';
+    const stone = cf['Stone'] || cf['Stone Name'] || skuStone[sku] || matchStone(p.name) || '';
     const row = [
       p.id,
       p.name,
       (p.custom_url && p.custom_url.url) || '',
       img,
       Number(p.price) || 0,
-      cf['Bead Size'] || '',
-      cf['Shape'] || '',
-      cf['Color'] || '',
-      cf['Treatment'] || '',
-      cf['Material'] || '',
+      cf['Bead Size'] || suggestSize(p.name),
+      cf['Shape'] || suggestShape(p.name),
+      cf['Color'] || suggestColor(p.name),
+      cf['Treatment'] || suggestTreatment(p.name),
+      cf['Material'] || suggestMaterial(p.name),
       cf['Unit Price A'] || '',
       cf['Unit Price B'] || '',
       cf['Unit Price C'] || '',
