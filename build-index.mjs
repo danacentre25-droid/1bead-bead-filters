@@ -84,8 +84,11 @@ async function main() {
   // 2) Products
   const products = await getAll(
     '/catalog/products?is_visible=true&include=custom_fields,primary_image' +
-    '&include_fields=id,name,price,categories,custom_url,order_quantity_minimum'
+    '&include_fields=id,name,price,categories,custom_url,order_quantity_minimum,sort_order'
   );
+
+  // Sort products by BigCommerce sort_order ascending so category JSON files match native category ordering
+  products.sort((a, b) => (a.sort_order ?? 999999) - (b.sort_order ?? 999999) || a.id - b.id);
 
   let skuStone = {};
   try {
